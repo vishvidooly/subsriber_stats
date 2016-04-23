@@ -46,4 +46,3 @@ if __name__ == "__main__":
     pool = Pool(processes=4)
     with open("/home/vidooly/Workspace/subscriber_stats/test.txt") as f:
         pool.map(worker_func, f)
-    print subid_list

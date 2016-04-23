@@ -7,7 +7,7 @@ import datetime
 import subprocess
 # from boto.s3.key import Key
 
-LOCAL_PATH = "/home/vidooly/Workspace/"  # path to dir
+LOCAL_PATH = "/home/vishnu/Workspace/"  # path to dir
 AWS_ACCESS_KEY_ID = 'AKIAIS2P5QBYE7KI5FIA'
 AWS_SECRET_ACCESS_KEY = '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'
 BUCKET_NAME = 'redshift-db'
@@ -38,9 +38,7 @@ def download_file():
     file_key = "gp_profiles"
     for l in bucket_list:
         if file_key in str(l.key):
-            print file_key
             if not os.path.exists(LOCAL_PATH + file_key):
-                print LOCAL_PATH + file_key
                 subprocess.call(["mkdir", "-p", LOCAL_PATH + file_key],
                                 shell=False)
             l.get_contents_to_filename(LOCAL_PATH + str(l.key))
