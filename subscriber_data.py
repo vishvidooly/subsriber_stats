@@ -33,6 +33,7 @@ def worker_func(line):
     if subs_data and subs_data.json().get("items", None):
         stats = yaml.load(subs_data.text).get("items", None)
         for subid_data in stats:
+            # TODO format according to map reduce
             data = {}
             data[subid_data['id']] = subid_data['statistics']
             logger.info("STATISTICS SUBCSRIBER_DATA : %s", data)
