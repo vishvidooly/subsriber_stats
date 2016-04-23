@@ -35,14 +35,11 @@ def worker_func(line):
         for subid_data in stats:
             data = {}
             data[subid_data['id']] = subid_data['statistics']
-            logger.info("stats SUBCSRIBER_DATA : %s", data)
-
-
-def sys_logging(stats, sub_id):
-    logger.info("%s SUBCSRIBER_DATA : %s", sub_id, stats)
+            logger.info("STATISTICS SUBCSRIBER_DATA : %s", data)
 
 
 if __name__ == "__main__":
     pool = Pool(processes=4)
-    with open("/home/vidooly/Workspace/subscriber_stats/test.txt") as f:
+    # file to be processed
+    with open("/home/vishnu/Workspace/gp_profiles/test.txt") as f:
         pool.map(worker_func, f)

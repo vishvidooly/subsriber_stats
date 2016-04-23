@@ -58,5 +58,6 @@ def worker_func(line):
 
 if __name__ == "__main__":
     pool = Pool(processes=4)
-    with open("/home/vidooly/Workspace/subscriber_stats/test.txt") as f:
+    # file to be processed
+    with open("/home/vishnu/Workspace/gp_profiles/test.txt") as f:
         pool.map(worker_func, f)
