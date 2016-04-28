@@ -1,6 +1,7 @@
 import urllib
 import requests
 import yaml
+import os
 from multiprocessing import Pool
 
 from log import logger
@@ -54,10 +55,13 @@ def worker_func(line):
             pass
     data["id"] = sub_id
     data['gender'] = gender
-    logger.info("GID SUBCSRIBER_DATA : %s", data)
+    logger.info("GID_F SUBCSRIBER_DATA : %s", data)
 
 if __name__ == "__main__":
     pool = Pool(processes=4)
     # file to be processed
-    with open("/home/vishnu/Workspace/gp_profiles/test.txt") as f:
-        pool.map(worker_func, f)
+    for i in os.listdir("/home/vishnu/Workspace/gp_profiles/splitfiles/"):
+    	with open("/home/vishnu/Workspace/gp_profiles/splitfiles/"+i) as f:
+        	pool.map(worker_func, f)
+                logger.debug("file done "+i)
+                print(i +"done")
