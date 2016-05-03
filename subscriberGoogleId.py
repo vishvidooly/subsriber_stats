@@ -34,10 +34,10 @@ def subscriber_gplus_profile(g_id):
 def worker_func(line):
     data = {}
     gender, gplus_data = None, None
-    sub_id, g_url = line.split("|")
+    sub_id, g_id = line.split("|")
 
-    # proces g_id for gender
-    g_id = g_url.strip().split("/")[-1]
+    # proces g_id for 
+    # g_id = g_url.strip().split("/")[-1]
 
     # g_id is not present generate g_id
     if not len(g_id) == 21:
