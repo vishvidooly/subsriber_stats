@@ -45,7 +45,8 @@ def worker_func1(line):
 
 def worker_func(line, url_list ,subid_list1):
     stats = {}
-    sub_id, g_url = line.split("|")
+    #sub_id, g_url = line.split("|")
+    sub_id = line
     subid_list1.append(sub_id)
     if len(subid_list1) >= 50 :
         params = urllib.urlencode({"part": PART, "id": ','.join(subid_list1),
@@ -72,20 +73,24 @@ def main_fn(file):
         while True:
             # print threading.current_thread()
             url = q.get()
-            response = requests.request('GET', url)
-            print response.status_code
-            if response.status_code == 200 :
-                if response.json().get("items", None):
-	        	stats = yaml.load(response.text).get("items", None)
-        		for subid_data in stats:
-            			# TODO format according to map reduce
-            			data = {}
-            			data[subid_data['id']] = subid_data['statistics']
-            			#logger.info("STATISTICS SUBCSRIBER_DATA : %s", data)
-            else :
-                print "Status: [%s] URL: %s" % (response.text, url)
+            try:
+                response = requests.request('GET', url)
+ 		if response.status_code == 200 :
+                	if response.json().get("items", None):
+                        	stats = yaml.load(response.text).get("items", None)
+                        	for subid_data in stats:
+                                	# TODO format according to map reduce
+                                	data = {}
+                                	data[subid_data['id']] = subid_data['statistics']
+                                	logger.info("NEW_STATISTICS "+os.path.basename(file)+" SUBCSRIBER_DATA : %s", data)
+            		else :
+                		print "Status: [%s] URL: %s" % (response.text, url)
+                                logger.error("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s response : %s",url,response.text) 
+            except requests.ConnectionError as e: 
+                print e
+                logger.error("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s ",url)
             q.task_done()            
-    concurrent = 20
+    concurrent = 30
     q = Queue(concurrent * 2)
     for i in range(concurrent):
         t = Thread(target=fetch)
@@ -98,19 +103,17 @@ def main_fn(file):
     except KeyboardInterrupt:
      sys.exit(1)
 
-    print ("done")
-
 
 if __name__ == "__main__":
     #pool = Pool(processes=4)
-
+    #dir = "/home/gulshan/tempFile/gp-profile/splitfiles0/process-4/"
+    dir = "/home/gulshan/subsriber_data/sub_channel_id_new/split_0/"
     # file to be processed
     no_processed = 0;
-    for i in os.listdir("/home/vishnu/Workspace/gp_profiles/splitfiles/"):
+    for i in os.listdir(dir):
            	#with open("/home/vishnu/Workspace/gp_profiles/splitfiles/"+i) as f:
         	#pool.map(worker_func1, f)
-                main_fn("/home/vishnu/Workspace/gp_profiles/splitfiles/"+i)
+                main_fn(dir+i)
                 #logger.debug("file done "+i)
                 no_processed += 1
                 print(i +" count = "+str(no_processed) + " done")
-                sys.exit(1)
