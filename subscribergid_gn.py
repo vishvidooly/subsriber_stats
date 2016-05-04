@@ -3,6 +3,7 @@ import requests
 import yaml
 import os
 import sys
+import threading
 
 from log import logger
 from threading import Thread
@@ -24,15 +25,13 @@ def fetch_gid(sub_id):
     params = urllib.urlencode({"part": PART, "id": sub_id,
                                "fields": "items(contentDetails(googlePlusUserId))",
                                "key": API_KEY})
-    # no_of_requests += 1
     try:
         result = requests.get(STAT_URL, params=params)
         if result.status_code == 200:
                 return result
-    except requests.ConnectionError as e:
+    except Exception as e:
         print e
-        logger.error("STATISTICS_ERROR "+os.path.basename(file)+" url: %s ",url)
-        return None
+        logger.info("GID_ERROR SUBSCRIBER_DATA url: %s ",url)
 
     return None
 
@@ -54,15 +53,12 @@ def log_response(response):
 
 
 
-def worker_func(line, url_list, no_of_requests):
-    #data = {}
+def worker_func(line, url_list):
     gender, gplus_data = None, None
     sub_id, g_id = line.split("|")
-
+    g_id = g_id.strip()
     # proces g_id for gender
     # g_id = g_url.strip().split("/")[-1]
-
-    #print g_id
     # g_id is not present generate g_id
     if not len(g_id) == 21:
         res = fetch_gid(sub_id)
@@ -70,39 +66,45 @@ def worker_func(line, url_list, no_of_requests):
             g_id = yaml.load(res.text)["items"][0]["contentDetails"]["googlePlusUserId"]
 
     params = urllib.urlencode({"key": API_KEY})
-    #no_of_requests += 1
     # check g_id factors
     if len(g_id) == 21 :
-        url_list.append(GPLUS_URL + str(g_id)+ "?" + str(params))
-        print len(url_list)
+        url_list.append(GPLUS_URL + str(g_id)+ "?" + str(params) +"|"+sub_id)
 
 
 def main_fn(file_path) :
     url_list = []
-    # NUM_SESSIONS = 20
-    no_of_requests = 0
-    # pool = Pool(100)
     with open(file_path) as f:
-        count = 0
         for line in f:
-            # print count
-            worker_func(line, url_list, no_of_requests)
-            count += 1
+            worker_func(line, url_list)
     print len(url_list)
-
-
     def fetch():
         while True:
-            url = q.get()
-            print url
-            response = requests.request('GET', url)
-            print response.text
-            if response.json().get("gender", None):
-                logger.info("GENDER SUBCSRIBER_DATA : %s", yaml.load(response.text)["gender"])
-            # if response.status_code == 200 :
-            #     print "Status: [%s] URL: %s" % (response.text, url)
-            q.task_done()
-    concurrent = 10
+            url , sub_id = q.get().split("|")
+            try :
+            	response = requests.request('GET', url,timeout = 10)
+            	#print ("Response recieved " + str(sub_id) + str(response.status_code))
+            	if response.status_code == 200:
+                        data = {}
+                	#print ("Response_200 recieved " +str(url)+"|"+ str(sub_id))
+                	#print ("Response "+str(threading.current_thread()))
+                        gender = None
+                        try:
+            			gender = yaml.load(response.text)["gender"]
+        		except:
+            			pass
+                        data["subscriber_id"] = sub_id
+                        data["gender"] = gender
+                      
+                	logger.info("GENDER_DATA SUBSCRIBER_DATA : %s", data)
+                else :
+                     logger.info("GENDER_ERROR_RESPONSE_"+os.path.basename(file_path)+" SUBSCRIBER_DATA response : %s url: %s|%s",response.text,url,sub_id)  
+                q.task_done()
+            except Exception as e:
+                print e 
+                logger.info("GENDER_ERROR_"+os.path.basename(file_path)+" SUBSCRIBER_DATA url: %s|%s",url,sub_id)
+            	q.task_done()
+            
+    concurrent = 2
     q = Queue(concurrent * 2)
     for i in range(concurrent):
         t = Thread(target=fetch)
@@ -117,9 +119,8 @@ def main_fn(file_path) :
 
 
 if __name__ == "__main__":
-    dir = "/home/vidooly/Workspace/gp_profiles/splitfiles0/test/"
+    dir = "/home/gulshan/subsriber_data/sub_gid_new/temp_0/"
     # file to be processed
     for i in os.listdir(dir):
         main_fn(dir+i)
-        print (i +" count = "+str(no_processed) + " done")
-        sys.exit(1)
+        print (str(i) + " done")
