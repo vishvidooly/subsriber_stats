@@ -85,12 +85,15 @@ def main_fn(file):
                                 	logger.info("NEW_STATISTICS "+os.path.basename(file)+" SUBCSRIBER_DATA : %s", data)
             		else :
                 		print "Status: [%s] URL: %s" % (response.text, url)
-                                logger.error("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s response : %s",url,response.text) 
+                                logger.info("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s response : %s",url,response.text) 
+                else :
+                        print "Status: [%s] URL: %s" % (response.text, url)
+                        logger.info("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s response : %s",url,response.text) 
             except requests.ConnectionError as e: 
                 print e
-                logger.error("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s ",url)
+                logger.info("NEW_STATISTICS_ERROR "+os.path.basename(file)+" url: %s ",url)
             q.task_done()            
-    concurrent = 30
+    concurrent = 20
     q = Queue(concurrent * 2)
     for i in range(concurrent):
         t = Thread(target=fetch)
@@ -107,7 +110,7 @@ def main_fn(file):
 if __name__ == "__main__":
     #pool = Pool(processes=4)
     #dir = "/home/gulshan/tempFile/gp-profile/splitfiles0/process-4/"
-    dir = "/home/gulshan/subsriber_data/sub_channel_id_new/split_0/"
+    dir = "/home/gulshan/subsriber_data/sub_channel_id_new/split_1/"
     # file to be processed
     no_processed = 0;
     for i in os.listdir(dir):
