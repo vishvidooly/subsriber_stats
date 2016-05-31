@@ -9,14 +9,12 @@ from log import logger
 from threading import Thread
 from Queue import Queue
 
-API_KEY = "AIzaSyCd2LRQsgIXhBRQtnJaFIRXPAN1ir0IwJE"
+API_KEY = "AIzaSyA5RI3AKWYAIA-42WcceHox3emuLoaaCIg"
 STAT_URL = "https://www.googleapis.com/youtube/v3/channels"
 GPLUS_URL = "https://www.googleapis.com/plus/v1/people/"
 PART = "contentDetails"
-no_of_requests = 0;
-NO_OF_KEYS = 5;
-API_KEYS = [ "AIzaSyCd2LRQsgIXhBRQtnJaFIRXPAN1ir0IwJE", "AIzaSyA5RI3AKWYAIA-42WcceHox3emuLoaaCIg"
-             "AIzaSyDNfUGGme2COg27EME6gJy5zCZsNG3ad-Q", "AIzaSyAfCfkySIlz25HDCn5VeqzSFsj8nfrswu8"
+API_KEYS = [ "AIzaSyCd2LRQsgIXhBRQtnJaFIRXPAN1ir0IwJE", "AIzaSyA5RI3AKWYAIA-42WcceHox3emuLoaaCIg",
+             "AIzaSyDNfUGGme2COg27EME6gJy5zCZsNG3ad-Q", "AIzaSyAfCfkySIlz25HDCn5VeqzSFsj8nfrswu8",
              "AIzaSyB_AZ4eO4y7lIpjc2cRKByR71GA1TJyDfU" ]
 
 
@@ -24,7 +22,7 @@ API_KEYS = [ "AIzaSyCd2LRQsgIXhBRQtnJaFIRXPAN1ir0IwJE", "AIzaSyA5RI3AKWYAIA-42Wc
 def fetch_gid(sub_id):
     params = urllib.urlencode({"part": PART, "id": sub_id,
                                "fields": "items(contentDetails(googlePlusUserId))",
-                               "key": API_KEY})
+                               "key": API_KEYS[4]})
     try:
         result = requests.get(STAT_URL, params=params)
         if result.status_code == 200:
@@ -95,16 +93,16 @@ def main_fn(file_path) :
                         data["subscriber_id"] = sub_id
                         data["gender"] = gender
                       
-                	logger.info("GENDER_DATA SUBSCRIBER_DATA : %s", data)
+                	logger.info("GENDER_DATA_1_UX SUBSCRIBER_DATA : %s", data)
                 else :
-                     logger.info("GENDER_ERROR_RESPONSE_"+os.path.basename(file_path)+" SUBSCRIBER_DATA response : %s url: %s|%s",response.text,url,sub_id)  
+                     logger.info("GENDER_ERROR_RESPONSE_1_AA_"+os.path.basename(file_path)+" SUBSCRIBER_DATA response : %s url: %s|%s",response.text,url,sub_id)  
                 q.task_done()
             except Exception as e:
                 print e 
-                logger.info("GENDER_ERROR_"+os.path.basename(file_path)+" SUBSCRIBER_DATA url: %s|%s",url,sub_id)
+                logger.info("GENDER_ERROR_1_AA_"+os.path.basename(file_path)+" SUBSCRIBER_DATA url: %s|%s",url,sub_id)
             	q.task_done()
             
-    concurrent = 2
+    concurrent = 1
     q = Queue(concurrent * 2)
     for i in range(concurrent):
         t = Thread(target=fetch)
@@ -119,8 +117,9 @@ def main_fn(file_path) :
 
 
 if __name__ == "__main__":
-    dir = "/home/gulshan/subsriber_data/sub_gid_new/temp_0/"
+    dir = "/home/vishnu/Workspace/gp_profiles/new_gp_profiles/splitfiles1/split1_u/"
     # file to be processed
+
     for i in os.listdir(dir):
         main_fn(dir+i)
         print (str(i) + " done")
